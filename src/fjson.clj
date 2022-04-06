@@ -5,7 +5,8 @@
             [criterium.core :as crit]
             [clojure.edn :as edn]
             [tech.viz.pyplot :as pyplot]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.pprint :as pp]))
 
 (def testfiles (->> (-> (java.io.File. "data/")
                         (.list))
@@ -45,10 +46,16 @@
 
 (defn benchmark->file
   [fname]
-  (spit fname (pr-str (benchmark-data))))
+  (spit fname (with-out-str (pp/pprint  (benchmark-data)))))
+
+
+(defn pp-file
+  [fname]
+  (spit fname (with-out-str (pp/pprint (edn/read-string (slurp fname))))))
 
 (comment
   (benchmark->file "jdk-8.edn")
+
   )
 
 
