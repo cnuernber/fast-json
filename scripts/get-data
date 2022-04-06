@@ -1,0 +1,9 @@
+#!/bin/bash
+
+mkdir -p data
+
+wget https://raw.githubusercontent.com/metosin/jsonista/master/dev-resources/json100b.json -P data
+wget https://raw.githubusercontent.com/metosin/jsonista/master/dev-resources/json100k.json -P data
+wget https://raw.githubusercontent.com/metosin/jsonista/master/dev-resources/json10b.json -P data
+wget https://raw.githubusercontent.com/metosin/jsonista/master/dev-resources/json10k.json -P data
+wget https://raw.githubusercontent.com/metosin/jsonista/master/dev-resources/json1k.json -P data
