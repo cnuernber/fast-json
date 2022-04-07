@@ -6,7 +6,8 @@
             [clojure.edn :as edn]
             [tech.viz.pyplot :as pyplot]
             [clojure.java.io :as io]
-            [clojure.pprint :as pp]))
+            [clojure.pprint :as pp])
+  (:import [com.fasterxml.jackson.databind ObjectMapper]))
 
 (def testfiles (->> (-> (java.io.File. "data/")
                         (.list))
@@ -14,9 +15,18 @@
                     (mapv (fn [fname]
                             [fname (slurp (str "data/" fname))]))))
 
+
+(defn jsonista-mutable
+  []
+  (let [mapper (doto (ObjectMapper.)
+                 (.registerModule (jsonista/java-collection-module)))]
+    #(jsonista/read-value % mapper)))
+
+
 (def parse-fns
   {:clj-json #(clj-json/read-str %)
    :jsonista #(jsonista/read-value %)
+   :jsonista-mutable (jsonista-mutable)
    :dtype (char-input/parse-json-fn {:profile :immutable})
    :dtype-mutable (char-input/parse-json-fn {:profile :mutable})
    :dtype-mixed (char-input/parse-json-fn {:profile :mixed})
@@ -54,7 +64,7 @@
   (spit fname (with-out-str (pp/pprint (edn/read-string (slurp fname))))))
 
 (comment
-  (benchmark->file "jdk-8.edn")
+  (benchmark->file "jdk-17.edn")
 
   )
 
@@ -83,8 +93,8 @@
         :encoding
         {:y {:field :mean, :type :quantitative :axis {:grid false}}
          :x {:field :length :type :quantitative}
-         :color {:field :engine :type :nominal}
-         :shape {:field :jdk :type :nominal}}}
+         :color {:field :jdk :type :nominal}
+         :shape {:field :engine :type :nominal}}}
        (pyplot/show))))
 
 
