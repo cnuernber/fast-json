@@ -67,7 +67,8 @@
                 (.startsWith jv "17.0") "jdk-17.edn"
                 (.startsWith jv "1.8") "jdk-8.edn"
                 :else (throw (Exception. "Unrecognized jvm version")))]
-    (benchmark->file fname))
+    (benchmark->file fname)
+    (println "wrote" fname))
 
   )
 
