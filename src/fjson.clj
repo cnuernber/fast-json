@@ -25,12 +25,10 @@
 
 (def parse-fns
   {:clj-json #(clj-json/read-str %)
-   :jsonista #(jsonista/read-value %)
+   :jsonista-immutable #(jsonista/read-value %)
    :jsonista-mutable (jsonista-mutable)
-   :dtype (char-input/parse-json-fn {:profile :immutable})
-   :dtype-mutable (char-input/parse-json-fn {:profile :mutable})
-   :dtype-mixed (char-input/parse-json-fn {:profile :mixed})
-   :dtype-raw (char-input/parse-json-fn {:profile :raw})})
+   :dtype-immutable (char-input/parse-json-fn {:profile :immutable})
+   :dtype-mutable (char-input/parse-json-fn {:profile :mutable})})
 
 
 (defmacro benchmark-ms
@@ -64,7 +62,12 @@
   (spit fname (with-out-str (pp/pprint (edn/read-string (slurp fname))))))
 
 (comment
-  (benchmark->file "jdk-17.edn")
+  (let [jv (System/getProperty "java.version")
+        fname (cond
+                (.startsWith jv "17.0") "jdk-17.edn"
+                (.startsWith jv "1.8") "jdk-8.edn"
+                :else (throw (Exception. "Unrecognized jvm version")))]
+    (benchmark->file fname))
 
   )
 
@@ -123,4 +126,10 @@
   (dotimes [idx 10000]
     (let [jfn (char-input/read-json-fn bigtext :profile :mutable)]
       (jfn)))
+
+  (let [data (second (nth testfiles 2))
+        jfn (char-input/parse-json-fn {:profile :mutable})]
+    (dotimes [idx 100000000]
+      (jfn data))
+    )
   )

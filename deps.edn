@@ -1,6 +1,6 @@
 {:paths ["src"]
  :deps {techascent/tech.ml.dataset {:mvn/version "6.078"}
-        cnuernber/dtype-next {:mvn/version "9.023"}
+        cnuernber/dtype-next {:mvn/version "9.024"}
         metosin/jsonista {:mvn/version "0.3.5"}
         criterium/criterium {:mvn/version "0.4.5"}
         techascent/tech.viz {:mvn/version "6.00-beta-16-2"}}
