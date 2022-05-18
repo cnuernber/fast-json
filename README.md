@@ -1,6 +1,6 @@
 # Simple JSON Benchmarks
 
-clojure.data.csv is named clj-json in the graph.
+clojure.data.json is named clj-json in the graph.
 
 
 ![results](docs/json-parse-speed.png)
