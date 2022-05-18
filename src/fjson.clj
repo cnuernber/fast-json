@@ -1,5 +1,6 @@
 (ns fjson
-  (:require [tech.v3.datatype.char-input :as char-input]
+  (:require [charred.api :as charred]
+            [ham-fisted.api :as ham-fisted]
             [clojure.data.json :as clj-json]
             [jsonista.core :as jsonista]
             [criterium.core :as crit]
@@ -7,7 +8,10 @@
             [tech.viz.pyplot :as pyplot]
             [clojure.java.io :as io]
             [clojure.pprint :as pp])
-  (:import [com.fasterxml.jackson.databind ObjectMapper]))
+  (:import [com.fasterxml.jackson.databind ObjectMapper]
+           [charred JSONReader$ObjReader]))
+
+(set! *warn-on-reflection* true)
 
 (def testfiles (->> (-> (java.io.File. "data/")
                         (.list))
@@ -27,8 +31,14 @@
   {:clj-json #(clj-json/read-str %)
    :jsonista-immutable #(jsonista/read-value %)
    :jsonista-mutable (jsonista-mutable)
-   :dtype-immutable (char-input/parse-json-fn {:profile :immutable})
-   :dtype-mutable (char-input/parse-json-fn {:profile :mutable})})
+   :charred-immutable (charred/parse-json-fn {:profile :immutable})
+   :charred-hamf (charred/parse-json-fn {:profile :immutable
+                                         :obj-iface
+                                         (reify JSONReader$ObjReader
+                                           (newObj [this] (ham-fisted.api/mut-map))
+                                           (onKV [this m k v] (ham-fisted.api/assoc! m k v))
+                                           (finalizeObj [this m] (persistent! m)))})
+   :charred-mutable (charred/parse-json-fn {:profile :mutable})})
 
 
 (defmacro benchmark-ms
@@ -133,4 +143,10 @@
     (dotimes [idx 100000000]
       (jfn data))
     )
+
+  (def jdata (char-input/read-json (java.io.File. "data/json100k.json")))
+
+
+  (dotimes [idx 100000]
+    (clj-json/write-str jdata))
   )
