@@ -9,15 +9,19 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp])
   (:import [com.fasterxml.jackson.databind ObjectMapper]
-           [charred JSONReader$ObjReader]))
+           [charred JSONReader$ObjReader JSONReader$ArrayReader]
+           [ham_fisted MutHashTable]
+           [java.util List Map]))
 
 (set! *warn-on-reflection* true)
 
 (def testfiles (->> (-> (java.io.File. "data/")
                         (.list))
                     (filter #(.endsWith (str %) ".json"))
-                    (mapv (fn [fname]
-                            [fname (slurp (str "data/" fname))]))))
+                    (map (fn [fname]
+                           [fname (slurp (str "data/" fname))]))
+                    (flatten)
+                    (apply array-map)))
 
 
 (defn jsonista-mutable
@@ -33,10 +37,17 @@
    :jsonista-mutable (jsonista-mutable)
    :charred-immutable (charred/parse-json-fn {:profile :immutable})
    :charred-hamf (charred/parse-json-fn {:profile :immutable
+                                         :ary-iface
+                                         (reify JSONReader$ArrayReader
+                                           (newArray [this] (ham-fisted/object-array-list))
+                                           (onValue [this m v] (.add ^List m v) m)
+                                           (finalizeArray [this m] m))
                                          :obj-iface
                                          (reify JSONReader$ObjReader
-                                           (newObj [this] (ham-fisted.api/mut-map))
-                                           (onKV [this m k v] (ham-fisted.api/assoc! m k v))
+                                           (newObj [this]
+                                             (MutHashTable. ham-fisted/equal-hash-provider))
+                                           (onKV [this m k v]
+                                             (.put ^Map m k v) m)
                                            (finalizeObj [this m] (persistent! m)))})
    :charred-mutable (charred/parse-json-fn {:profile :mutable})})
 
@@ -75,6 +86,7 @@
   (let [jv (System/getProperty "java.version")
         fname (cond
                 (.startsWith jv "17.0") "jdk-17.edn"
+                (.startsWith jv "19.0") "jdk-19.edn"
                 (.startsWith jv "1.8") "jdk-8.edn"
                 :else (throw (Exception. "Unrecognized jvm version")))]
     (benchmark->file fname)
@@ -99,17 +111,20 @@
 
 (defn chart-results
   ([& [fnames]]
-   (-> {:$schema "https://vega.github.io/schema/vega-lite/v5.1.0.json"
-        :mark {:type :point}
-        :width 800
-        :height 600
-        :data {:values (vec (flatten-results (or fnames ["jdk-8.edn" "jdk-17.edn"])))}
-        :encoding
-        {:y {:field :mean, :type :quantitative :axis {:grid false}}
-         :x {:field :length :type :quantitative}
-         :color {:field :jdk :type :nominal}
-         :shape {:field :engine :type :nominal}}}
-       (pyplot/show))))
+   (let [fnames (or fnames (filter #(and (.startsWith ^String % "jdk-")
+                                         (.endsWith ^String % "edn"))
+                                   (.list (java.io.File. "./"))))]
+     (-> {:$schema "https://vega.github.io/schema/vega-lite/v5.1.0.json"
+          :mark {:type :point}
+          :width 800
+          :height 600
+          :data {:values (vec (flatten-results fnames))}
+          :encoding
+          {:y {:field :mean, :type :quantitative :axis {:grid false}}
+           :x {:field :length :type :quantitative}
+           :color {:field :jdk :type :nominal}
+           :shape {:field :engine :type :nominal}}}
+         (pyplot/show)))))
 
 
 (comment
