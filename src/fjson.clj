@@ -11,7 +11,7 @@
   (:import [com.fasterxml.jackson.databind ObjectMapper]
            [charred JSONReader$ObjReader JSONReader$ArrayReader]
            [ham_fisted MutHashTable]
-           [java.util List Map]))
+           [java.util List Map ArrayDeque]))
 
 (set! *warn-on-reflection* true)
 
@@ -30,18 +30,63 @@
                  (.registerModule (jsonista/java-collection-module)))]
     #(jsonista/read-value % mapper)))
 
+(definterface IEventParser
+  (onEvents [event-data]))
+
+(deftype EventParser [^ArrayDeque stack
+                      ^{:unsynchronized-mutable true} tos]
+  IEventParser
+  (onEvents [this event-data]
+    (set! tos
+          (reduce (fn [tos evt]
+                    (cond
+                      (identical? :new-obj evt)
+                      (do
+                        (.add stack (MutHashTable. ham-fisted/equal-hash-provider))
+                        tos)
+                      (identical? :new-array evt)
+                      (do (.add stack (ham-fisted/object-array-list))
+                          tos)
+                      (identical? :end-obj evt)
+                      (persistent! (.pollLast stack))
+                      (identical? :end-array evt)
+                      (.pollLast stack)
+                      (vector? evt)
+                      (let [k (.get ^List evt 0)
+                            v (.get ^List evt 1)
+                            end-idx (unchecked-dec (.size stack))]
+                        (.put ^Map (.peekLast stack) k (if (identical? v :tos)
+                                                         tos
+                                                         v))
+                        tos)
+                      :else
+                      (do
+                        (.add ^List (.peekLast stack) (if (identical? evt :tos)
+                                                        tos
+                                                        evt)))))
+                  tos
+                  event-data)))
+  clojure.lang.IDeref
+  (deref [this] tos))
+
+
+(defn parse-events [events]
+  (let [p (EventParser. (ArrayDeque.) nil)]
+    (.onEvents p events)
+    @p))
+
 
 (def parse-fns
   {:clj-json #(clj-json/read-str %)
    :jsonista-immutable #(jsonista/read-value %)
    :jsonista-mutable (jsonista-mutable)
    :charred-immutable (charred/parse-json-fn {:profile :immutable})
-   :charred-hamf (charred/parse-json-fn {:profile :immutable
-                                         :ary-iface
+   ;;Also produces persistent datastructures
+   :charred-hamf (charred/parse-json-fn {:ary-iface
                                          (reify JSONReader$ArrayReader
                                            (newArray [this] (ham-fisted/object-array-list))
                                            (onValue [this m v] (.add ^List m v) m)
-                                           (finalizeArray [this m] m))
+                                           (finalizeArray [this m] (persistent! m)))
                                          :obj-iface
                                          (reify JSONReader$ObjReader
                                            (newObj [this]
@@ -49,6 +94,31 @@
                                            (onKV [this m k v]
                                              (.put ^Map m k v) m)
                                            (finalizeObj [this m] (persistent! m)))})
+   ;;test pathway to produce a stream of events to see what the max speed of the parser really
+   ;;is - turns out with latest charred this isn't much faster than mutable or hamf as the
+   ;;map keys are canonicalized.
+   ;; :charred-events
+   ;; (charred/parse-json-fn
+   ;;  {:parser-fn
+   ;;   (fn []
+   ;;     (let [data (ham-fisted/object-array-list)]
+   ;;       {:array-iface
+   ;;        (reify JSONReader$ArrayReader
+   ;;          (newArray [this] (.add data :new-array) :new-array)
+   ;;          (onValue [this m v]
+   ;;            (.add data (if (keyword? v)
+   ;;                         :tos
+   ;;                         v))
+   ;;                   m)
+   ;;          (finalizeArray [this m] (.add data :end-array) :end-array))
+   ;;        :obj-iface
+   ;;        (reify JSONReader$ObjReader
+   ;;          (newObj [this] (.add data :new-obj) :new-obj)
+   ;;          (onKV [this m k v] (.add data [k (if (keyword? v)
+   ;;                                             :tos
+   ;;                                             v)]) m)
+   ;;          (finalizeObj [this m] (.add data :end-obj) :end-obj))
+   ;;        :finalize-fn (constantly data)}))})
    :charred-mutable (charred/parse-json-fn {:profile :mutable})})
 
 
