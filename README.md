@@ -5,9 +5,6 @@ I removed clj-json - it is too far out of range of everything else and thus is c
 ```clojure
 ;;  Startup: /usr/local/bin/clojure -A:dev -Sdeps '{:deps {nrepl/nrepl {:mvn/version "1.0.0"} cider/cider-nrepl {:mvn/version "0.28.5"}} :aliases {:cider/nrepl {:main-opts ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]"]}}}' -M:cider/nrepl
 user> 
-fjson> (crit/quick-bench ((parse-fns :charred-mutable) (testfiles "test100k.json")))
-Execution error (IllegalArgumentException) at charred.api/->reader (api.clj:53).
-Cannot open <nil> as a Reader.
 fjson> (crit/quick-bench ((parse-fns :charred-mutable) (testfiles "json100k.json")))
 Evaluation count : 1986 in 6 samples of 331 calls.
              Execution time mean : 304.532701 µs
