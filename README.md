@@ -1,6 +1,6 @@
 # Simple JSON Benchmarks
 
-I removed clj-json - it is too far out of range of everything else and thus is compressing the rest of the benchmarks.  Running all the benchmarks on my computer kicks off the heat management system and everything slows down considerably.  Here are the some average benchmarks for jdk-19:
+I removed clj-json - it is too far out of range of everything else and thus is compressing the rest of the benchmarks.  Running all the benchmarks on my computer kicks off the heat management system and everything slows down considerably.  Here are the some average benchmarks for jdk-19 - note you need the dev profile enabled as the parallelgc is faster for this benchmark by quite a bit:
 
 ```clojure
 ;;  Startup: /usr/local/bin/clojure -A:dev -Sdeps '{:deps {nrepl/nrepl {:mvn/version "1.0.0"} cider/cider-nrepl {:mvn/version "0.28.5"}} :aliases {:cider/nrepl {:main-opts ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]"]}}}' -M:cider/nrepl
