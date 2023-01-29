@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Building uberjar"
+rm -rf target
+clj -T:build uberjar

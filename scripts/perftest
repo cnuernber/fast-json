@@ -1,0 +1,21 @@
+#!/bin/bash
+
+
+set -e
+
+scripts/uberjar
+
+
+echo "Running perftest on current jvm"
+java -version
+java -XX:+UseParallelGC -jar target/fast-json.jar
+
+
+echo "Running perftest on jdk 19"
+source scripts/enable-jdk19
+java -version
+java -XX:+UseParallelGC -jar target/fast-json.jar
+
+
+java -jar target/fast-json.jar chart
+xdg-open docs/chart.svg

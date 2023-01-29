@@ -3,7 +3,7 @@
 clojure.data.json is named clj-json in the graph.
 
 
-![results](docs/json-parse-speed.png)
+![results](docs/chart.svg)
 
 
 * [source code](src/fjson.clj)

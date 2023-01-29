@@ -7,11 +7,13 @@
             [clojure.edn :as edn]
             [tech.viz.pyplot :as pyplot]
             [clojure.java.io :as io]
+            [applied-science.darkstar :as darkstar]
             [clojure.pprint :as pp])
   (:import [com.fasterxml.jackson.databind ObjectMapper]
            [charred JSONReader$ObjReader JSONReader$ArrayReader]
            [ham_fisted MutHashTable]
-           [java.util List Map ArrayDeque]))
+           [java.util List Map ArrayDeque])
+  (:gen-class))
 
 (set! *warn-on-reflection* true)
 
@@ -77,9 +79,8 @@
 
 
 (def parse-fns
-  {:clj-json #(clj-json/read-str %)
-   :jsonista-immutable #(jsonista/read-value %)
-   :jsonista-mutable (jsonista-mutable)
+  {:jsonista-mutable (jsonista-mutable)
+   :charred-mutable (charred/parse-json-fn {:profile :mutable})
    :charred-immutable (charred/parse-json-fn {:profile :immutable})
    ;;Also produces persistent datastructures
    :charred-hamf (charred/parse-json-fn {:ary-iface
@@ -119,7 +120,7 @@
    ;;                                             v)]) m)
    ;;          (finalizeObj [this m] (.add data :end-obj) :end-obj))
    ;;        :finalize-fn (constantly data)}))})
-   :charred-mutable (charred/parse-json-fn {:profile :mutable})})
+})
 
 
 (defmacro benchmark-ms
@@ -184,22 +185,38 @@
    (let [fnames (or fnames (filter #(and (.startsWith ^String % "jdk-")
                                          (.endsWith ^String % "edn"))
                                    (.list (java.io.File. "./"))))]
-     (-> {:$schema "https://vega.github.io/schema/vega-lite/v5.1.0.json"
-          :mark {:type :point}
-          :width 800
-          :height 600
-          :data {:values (vec (flatten-results fnames))}
-          :encoding
-          {:y {:field :mean, :type :quantitative :axis {:grid false}}
-           :x {:field :length :type :quantitative}
-           :color {:field :jdk :type :nominal}
-           :shape {:field :engine :type :nominal}}}
-         (pyplot/show)))))
+     (spit "docs/chart.svg"
+           (-> {:$schema "https://vega.github.io/schema/vega-lite/v5.1.0.json"
+                :mark {:type :point}
+                :width 800
+                :height 600
+                :data {:values (vec (flatten-results fnames))}
+                :encoding
+                {:y {:field :mean, :type :quantitative :axis {:grid false}}
+                 :x {:field :length :type :quantitative}
+                 :color {:field :jdk :type :nominal}
+                 :shape {:field :engine :type :nominal}}}
+               (charred/write-json-str)
+               (darkstar/vega-lite-spec->svg))))))
 
 
 (comment
   (chart-results)
   )
+
+
+(defn -main
+  [& args]
+  (if (== 0 (count args))
+    (let [jv (System/getProperty "java.version")
+          fname (cond
+                  (.startsWith jv "17.0") "jdk-17.edn"
+                  (.startsWith jv "19.0") "jdk-19.edn"
+                  (.startsWith jv "1.8") "jdk-8.edn"
+                  :else (throw (Exception. "Unrecognized jvm version")))]
+      (benchmark->file fname)
+      (println "wrote" fname))
+    (chart-results)))
 
 
 (comment

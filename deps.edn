@@ -1,10 +1,13 @@
 {:paths ["src"]
  :deps {techascent/tech.ml.dataset {:mvn/version "7.000-beta-25"}
-        com.cnuernber/charred {:mvn/version "1.022"}
+        com.cnuernber/charred {:mvn/version "1.025"}
         metosin/jsonista {:mvn/version "0.3.5"}
         criterium/criterium {:mvn/version "0.4.5"}
         techascent/tech.viz {:mvn/version "6.00-beta-16-2"}}
  :aliases
  ;;For this performance suite, the parallel gc is faster.
  {:dev {:extra-deps {com.clojure-goes-fast/clj-memory-meter {:mvn/version "0.1.0"}}
-        :jvm-opts ["-XX:+UseParallelGC"]}}}
+        :jvm-opts ["-XX:+UseParallelGC"]}
+  :build
+  {:deps {io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}
+   :ns-default build}}}
