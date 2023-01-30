@@ -1,90 +1,90 @@
 ({:name "json10b.json",
   :length 10,
   :results
-  ({:mean 1.786832702005263E-4,
-    :variance 1.1846530516783951E-14,
+  ({:mean 1.0440971214339281E-4,
+    :variance 1.1984982126654798E-16,
     :engine :charred-hamf}
-   {:mean 1.8170741764998445E-4,
-    :variance 2.0863467306764524E-15,
-    :engine :charred-mutable}
-   {:mean 2.0993645659673682E-4,
-    :variance 3.0698731715872987E-15,
+   {:mean 1.0560054014571092E-4,
+    :variance 1.5540274876464934E-16,
     :engine :jsonista-mutable}
-   {:mean 2.6569318789827605E-4,
-    :variance 9.779903883309644E-15,
+   {:mean 1.0871511634876404E-4,
+    :variance 5.652673435945758E-16,
+    :engine :charred-mutable}
+   {:mean 1.5142252409412835E-4,
+    :variance 4.119007104402571E-16,
     :engine :charred-immutable})}
  {:name "json100b.json",
   :length 100,
   :results
-  ({:mean 7.649514889994242E-4,
-    :variance 1.541966812496708E-14,
+  ({:mean 3.3794551665553875E-4,
+    :variance 4.550034835949374E-13,
     :engine :charred-mutable}
-   {:mean 7.770695049197913E-4,
-    :variance 3.272885337215244E-14,
+   {:mean 3.832691208229507E-4,
+    :variance 2.680526479136215E-15,
     :engine :charred-hamf}
-   {:mean 9.130091718398762E-4,
-    :variance 3.11109409036714E-13,
+   {:mean 4.206387432334534E-4,
+    :variance 3.8247946640184554E-15,
     :engine :jsonista-mutable}
-   {:mean 0.0012385771987499493,
-    :variance 3.218197261203658E-13,
+   {:mean 6.147731720473112E-4,
+    :variance 1.3412075866810501E-14,
     :engine :charred-immutable})}
  {:name "json1k.json",
   :length 907,
   :results
-  ({:mean 0.0036562340053713995,
-    :variance 2.164191823229095E-12,
-    :engine :charred-mutable}
-   {:mean 0.0037830201163030677,
-    :variance 1.814979501829414E-12,
+  ({:mean 0.0019453287824458467,
+    :variance 9.340627595598602E-13,
     :engine :charred-hamf}
-   {:mean 0.0042604206917672945,
-    :variance 2.7825324158147127E-12,
+   {:mean 0.002010909473470218,
+    :variance 4.3768160817653725E-13,
+    :engine :charred-mutable}
+   {:mean 0.002090385694581686,
+    :variance 1.2934543787756136E-12,
     :engine :jsonista-mutable}
-   {:mean 0.0063722265963116935,
-    :variance 1.0502481877608562E-11,
+   {:mean 0.0034414385153339064,
+    :variance 2.67930463478811E-14,
     :engine :charred-immutable})}
  {:name "json10k.json",
   :length 10659,
   :results
-  ({:mean 0.037504734140080674,
-    :variance 3.505222194691512E-9,
-    :engine :jsonista-mutable}
-   {:mean 0.03918771793546906,
-    :variance 3.788200504489389E-9,
-    :engine :charred-hamf}
-   {:mean 0.040827111661384044,
-    :variance 2.641145958880175E-10,
+  ({:mean 0.021291834778012685,
+    :variance 4.064650211152623E-11,
     :engine :charred-mutable}
-   {:mean 0.07142502030217186,
-    :variance 1.3638530214144845E-10,
+   {:mean 0.021309610277014168,
+    :variance 4.671239146384793E-12,
+    :engine :charred-hamf}
+   {:mean 0.02191034894115923,
+    :variance 2.894525143198392E-11,
+    :engine :jsonista-mutable}
+   {:mean 0.03950713138977636,
+    :variance 4.1819979537766064E-11,
     :engine :charred-immutable})}
  {:name "stocks.json",
   :length 29055,
   :results
-  ({:mean 0.21052253514056224,
-    :variance 2.3170024174423176E-9,
-    :engine :charred-mutable}
-   {:mean 0.2151114222689076,
-    :variance 2.205591063381235E-8,
+  ({:mean 0.10978577475516867,
+    :variance 1.3111625575428748E-9,
     :engine :charred-hamf}
-   {:mean 0.23222704659090912,
-    :variance 8.62464626735262E-9,
+   {:mean 0.10986851601871848,
+    :variance 2.2149866730924554E-11,
+    :engine :charred-mutable}
+   {:mean 0.11687496507566938,
+    :variance 5.888606794133061E-10,
     :engine :jsonista-mutable}
-   {:mean 0.30697031836327343,
-    :variance 1.9171345788654124E-8,
+   {:mean 0.16605829392446636,
+    :variance 4.309888443977089E-10,
     :engine :charred-immutable})}
  {:name "json100k.json",
   :length 101543,
   :results
-  ({:mean 0.3606495786713287,
-    :variance 3.7389438392307436E-7,
-    :engine :jsonista-mutable}
-   {:mean 0.39686260144927543,
-    :variance 2.403402648515473E-8,
+  ({:mean 0.2092351827846365,
+    :variance 2.978462560564951E-9,
     :engine :charred-mutable}
-   {:mean 0.4147664986338799,
-    :variance 3.787898112753578E-8,
+   {:mean 0.2098350152777778,
+    :variance 4.202823925195585E-9,
     :engine :charred-hamf}
-   {:mean 0.6937847150900901,
-    :variance 2.4690507597055337E-8,
+   {:mean 0.21087188598326362,
+    :variance 3.1315184824279453E-9,
+    :engine :jsonista-mutable}
+   {:mean 0.38213449680715206,
+    :variance 6.190571261811581E-9,
     :engine :charred-immutable})})
