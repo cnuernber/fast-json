@@ -78,6 +78,45 @@
     @p))
 
 
+(def test-parse-fns
+  {:charred-manual-keyword
+   (charred/parse-json-fn {:ary-iface
+                           (reify JSONReader$ArrayReader
+                             (newArray [this] (ham-fisted/object-array-list))
+                             (onValue [this m v] (.add ^List m v) m)
+                             (finalizeArray [this m] (persistent! m)))
+                           :obj-iface
+                           (reify JSONReader$ObjReader
+                             (newObj [this]
+                               (ham-fisted/mut-map))
+                             (onKV [this m k v]
+                               (.put ^Map m (keyword k) v) m)
+                             (finalizeObj [this m] (persistent! m)))})
+   :charred-auto-keyword
+   (charred/parse-json-fn {:key-fn keyword
+                           :ary-iface
+                           (reify JSONReader$ArrayReader
+                             (newArray [this] (ham-fisted/object-array-list))
+                             (onValue [this m v] (.add ^List m v) m)
+                             (finalizeArray [this m] (persistent! m)))
+                           :obj-iface
+                           (reify JSONReader$ObjReader
+                             (newObj [this]
+                               (ham-fisted/mut-map))
+                             (onKV [this m k v]
+                               (.put ^Map m k v) m)
+                             (finalizeObj [this m] (persistent! m)))})
+
+   :charred-immut-auto
+   (charred/parse-json-fn {:key-fn keyword})
+   :charred-immut-manual
+   (charred/parse-json-fn {:key-fn #(keyword %)})
+   :jsonista-immut-keyword
+   (let [mapper (jsonista/object-mapper {:decode-key-fn keyword})]
+     #(jsonista/read-value % mapper))})
+
+
+
 (def parse-fns
   {:jsonista-mutable (jsonista-mutable)
    :charred-mutable (charred/parse-json-fn {:profile :mutable})
@@ -205,9 +244,20 @@
   )
 
 
+(defn test-keyword-deserialize
+  []
+  (println "jsonista-immut-keyword")
+  (crit/quick-bench ((test-parse-fns :jsonista-immut-keyword) (testfiles "json100k.json")))
+  (println "charred-immut-keyword")
+  (crit/quick-bench ((test-parse-fns :charred-immut-auto) (testfiles "json100k.json")))
+  (println "charred-hamf-keyword")
+  (crit/quick-bench ((test-parse-fns :charred-auto-keyword) (testfiles "json100k.json")))
+  )
+
+
 (defn -main
   [& args]
-  (if (== 0 (count args))
+  #_(if (== 0 (count args))
     (let [jv (System/getProperty "java.version")
           fname (cond
                   (.startsWith jv "17.0") "jdk-17.edn"
@@ -216,7 +266,9 @@
                   :else (throw (Exception. "Unrecognized jvm version")))]
       (benchmark->file fname)
       (println "wrote" fname))
-    (chart-results)))
+    (chart-results))
+  (test-keyword-deserialize)
+  (println "done"))
 
 
 (comment
