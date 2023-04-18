@@ -8,7 +8,9 @@
             [tech.viz.pyplot :as pyplot]
             [clojure.java.io :as io]
             [applied-science.darkstar :as darkstar]
-            [clojure.pprint :as pp])
+            [clojure.pprint :as pp]
+            [benchmark.api :refer [benchmark-us]]
+            [tech.v3.dataset :as ds])
   (:import [com.fasterxml.jackson.databind ObjectMapper]
            [charred JSONReader$ObjReader JSONReader$ArrayReader]
            [ham_fisted MutHashTable]
@@ -246,13 +248,23 @@
 
 (defn test-keyword-deserialize
   []
-  (println "jsonista-immut-keyword")
-  (crit/quick-bench ((test-parse-fns :jsonista-immut-keyword) (testfiles "json100k.json")))
-  (println "charred-immut-keyword")
-  (crit/quick-bench ((test-parse-fns :charred-immut-auto) (testfiles "json100k.json")))
-  (println "charred-hamf-keyword")
-  (crit/quick-bench ((test-parse-fns :charred-auto-keyword) (testfiles "json100k.json")))
-  )
+  (let [data {:clj (benchmark-us (clj-json/read-str (testfiles "json100k.json") :key-fn keyword))
+              :jsonista (benchmark-us ((test-parse-fns :jsonista-immut-keyword) (testfiles "json100k.json")))
+              :charred (benchmark-us ((test-parse-fns :charred-immut-auto) (testfiles "json100k.json")))
+              :charred-hamf (benchmark-us ((test-parse-fns :charred-auto-keyword) (testfiles "json100k.json")))}
+        perf-colname "performance µs"]
+    (->
+     (->> data
+          (map (fn [kv]
+                 {"method" (key kv)
+                  perf-colname
+                  (-> (val kv)
+                      (get :mean-μs)
+                      (double)
+                      (Math/round))}))
+          (ds/->>dataset))
+     (ds/sort-by-column perf-colname >)
+     (println))))
 
 
 (defn -main

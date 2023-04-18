@@ -1,8 +1,9 @@
 {:paths ["src"]
- :deps {techascent/tech.ml.dataset {:mvn/version "7.000-beta-25"}
-        com.cnuernber/charred {:mvn/version "1.026"}
+ :deps {techascent/tech.ml.dataset {:mvn/version "7.000-beta-35"}
+        com.cnuernber/charred {:mvn/version "1.028"}
         metosin/jsonista {:mvn/version "0.3.5"}
         criterium/criterium {:mvn/version "0.4.5"}
+        com.cnuernber/benchmark {:mvn/version "1.000-beta-2"}
         techascent/tech.viz {:mvn/version "6.00-beta-16-2"}}
  :aliases
  ;;For this performance suite, the parallel gc is faster.
